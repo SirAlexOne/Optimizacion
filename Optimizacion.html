@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador: Optimización de Ruta para Dron - Prof. Fuentes Montoya</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, #1a2980, #26d0ce);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 5px solid #ff8c00;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            font-weight: 300;
+            margin-bottom: 15px;
+        }
+        
+        .professor {
+            font-size: 1.1rem;
+            font-style: italic;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .equation-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px auto;
+            width: 90%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        
+        .controls-panel {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-right: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .visualization {
+            flex: 2;
+            min-width: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .plot-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 15px;
+            flex: 1;
+        }
+        
+        .plot {
+            width: 100%;
+            height: 400px;
+        }
+        
+        h2 {
+            color: #1a2980;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #26d0ce;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1a2980;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus, input:focus {
+            border-color: #26d0ce;
+            outline: none;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+        
+        .optimize-btn {
+            background: linear-gradient(to right, #1a2980, #26d0ce);
+        }
+        
+        .optimize-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .reset-btn {
+            background: linear-gradient(to right, #b21f1f, #ff8c00);
+        }
+        
+        .reset-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .method-info {
+            background: white;
+            border-left: 4px solid #26d0ce;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 20px;
+        }
+        
+        .method-info h3 {
+            color: #1a2980;
+            margin-bottom: 10px;
+        }
+        
+        .results-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: linear-gradient(to right, #1a2980, #26d0ce);
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        tr:hover {
+            background-color: #e6f7ff;
+        }
+        
+        .error-cell {
+            color: #e74c3c;
+            font-weight: 700;
+        }
+        
+        .success-cell {
+            color: #27ae60;
+            font-weight: 700;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(to right, #1a2980, #26d0ce);
+            color: white;
+            margin-top: 20px;
+        }
+        
+        .point-label {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            pointer-events: none;
+        }
+        
+        @media (max-width: 1100px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .controls-panel {
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Optimización de Ruta para Dron de Entrega</h1>
+            <div class="subtitle">Algoritmos de Optimización Sin Restricciones</div>
+            <div class="professor">Profesor: Jose Alexander Fuentes Montoya</div>
+        </header>
+        
+        <div class="equation-container">
+            Minimiza el consumo energético: 
+            \( f(x,y) = 3(x-4)^2 + 2(y-3)^2 + 5 \sin(0.5x) \cos(0.5y) + 10 \)
+        </div>
+        
+        <div class="content">
+            <div class="controls-panel">
+                <h2>Configuración de la Simulación</h2>
+                
+                <div class="control-group">
+                    <label for="method">Método de Optimización:</label>
+                    <select id="method">
+                        <option value="gradient">Gradiente Descendente</option>
+                        <option value="newton">Newton-Raphson</option>
+                        <option value="conjugate">Gradiente Conjugado</option>
+                        <option value="bfgs">BFGS (Quasi-Newton)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="x0">Punto Inicial (coordenada x):</label>
+                    <input type="number" id="x0" value="0.0" step="0.1">
+                </div>
+                
+                <div class="control-group">
+                    <label for="y0">Punto Inicial (coordenada y):</label>
+                    <input type="number" id="y0" value="0.0" step="0.1">
+                </div>
+                
+                <div class="control-group">
+                    <label for="max-iter">Máximo de Iteraciones:</label>
+                    <input type="number" id="max-iter" value="200" min="10" max="1000">
+                </div>
+                
+                <div class="control-group">
+                    <label for="tolerance">Tolerancia de Convergencia:</label>
+                    <input type="number" id="tolerance" value="0.0001" step="0.0001" min="0.000001">
+                </div>
+                
+                <div class="button-group">
+                    <button class="optimize-btn" onclick="runOptimization()">Optimizar Ruta</button>
+                    <button class="reset-btn" onclick="reset()">Reiniciar</button>
+                </div>
+                
+                <div class="method-info">
+                    <h3>Información del Método Seleccionado</h3>
+                    <p id="method-description">El Gradiente Descendente sigue la dirección de máxima pendiente para encontrar mínimos. Es robusto pero puede ser lento en terrenos complejos.</p>
+                </div>
+            </div>
+            
+            <div class="visualization">
+                <div class="plot-container">
+                    <h2>Superficie de Energía y Trayectoria</h2>
+                    <div id="surface-plot" class="plot"></div>
+                </div>
+                
+                <div class="plot-container">
+                    <h2>Curvas de Nivel y Progreso</h2>
+                    <div id="contour-plot" class="plot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results-panel">
+            <h2>Resultados de la Optimización</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Método</th>
+                        <th>Iteraciones</th>
+                        <th>Punto Final (x, y)</th>
+                        <th>Valor Final (f)</th>
+                        <th>Error</th>
+                        <th>Convergencia</th>
+                        <th>Tiempo (ms)</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px;">
+                            Ejecuta una optimización para ver los resultados
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <footer>
+            Simulador de Métodos de Optimización &copy; 2023 - Departamento de Ingeniería
+        </footer>
+    </div>
+
+    <script>
+        // Función objetivo convexa mejorada
+        function f(x, y) {
+            // Término cuadrático principal (convexa)
+            const quadraticTerm = 3 * Math.pow(x - 4, 2) + 2 * Math.pow(y - 3, 2);
+            
+            // Término sinusoidal suave (no afecta convexidad)
+            const sinTerm = 5 * Math.sin(0.5 * x) * Math.cos(0.5 * y);
+            
+            return quadraticTerm + sinTerm + 10;
+        }
+
+        // Gradiente (derivadas parciales)
+        function gradient(x, y) {
+            // Derivadas del término cuadrático
+            const dfdx_quad = 6 * (x - 4);
+            const dfdy_quad = 4 * (y - 3);
+            
+            // Derivadas del término sinusoidal
+            const dfdx_sin = 2.5 * Math.cos(0.5 * x) * Math.cos(0.5 * y);
+            const dfdy_sin = -2.5 * Math.sin(0.5 * x) * Math.sin(0.5 * y);
+            
+            return [dfdx_quad + dfdx_sin, dfdy_quad + dfdy_sin];
+        }
+
+        // Hessiano (matriz de segundas derivadas)
+        function hessian(x, y) {
+            // Segundas derivadas del término cuadrático
+            const d2fdx2_quad = 6;
+            const d2fdy2_quad = 4;
+            const d2fdxdy_quad = 0;
+            
+            // Segundas derivadas del término sinusoidal
+            const d2fdx2_sin = -1.25 * Math.sin(0.5 * x) * Math.cos(0.5 * y);
+            const d2fdy2_sin = -1.25 * Math.sin(0.5 * x) * Math.cos(0.5 * y);
+            const d2fdxdy_sin = -1.25 * Math.cos(0.5 * x) * Math.sin(0.5 * y);
+            
+            return [
+                [d2fdx2_quad + d2fdx2_sin, d2fdxdy_quad + d2fdxdy_sin],
+                [d2fdxdy_quad + d2fdxdy_sin, d2fdy2_quad + d2fdy2_sin]
+            ];
+        }
+
+        // Búsqueda lineal por backtracking
+        function backtrackingLineSearch(x, y, dx, dy, alpha=1.0, beta=0.8) {
+            const [gx, gy] = gradient(x, y);
+            const initialSlope = gx*dx + gy*dy;
+            const f0 = f(x, y);
+            let step = alpha;
+            
+            // Reducir el paso hasta que se satisfaga la condición de Armijo
+            for (let i = 0; i < 20; i++) {
+                const xNew = x + step * dx;
+                const yNew = y + step * dy;
+                const fNew = f(xNew, yNew);
+                
+                if (fNew <= f0 + 0.0001 * step * initialSlope) {
+                    return step;
+                }
+                step *= beta;
+            }
+            return step;
+        }
+
+        // Métodos de optimización con criterio de parada mejorado
+        function gradientDescent(x0, y0, maxIter, tolerance) {
+            let x = x0, y = y0;
+            const path = [[x, y, f(x,y)]];
+            let iter = 0;
+            const startTime = performance.now();
+            let converged = false;
+            
+            while (iter < maxIter) {
+                iter++;
+                const [gx, gy] = gradient(x, y);
+                const normGrad = Math.sqrt(gx*gx + gy*gy);
+                
+                // Verificar convergencia
+                if (normGrad < tolerance) {
+                    converged = true;
+                    break;
+                }
+                
+                // Dirección: -gradiente
+                const dx = -gx;
+                const dy = -gy;
+                
+                // Búsqueda lineal
+                const step = backtrackingLineSearch(x, y, dx, dy);
+                
+                // Actualizar posición
+                x += step * dx;
+                y += step * dy;
+                path.push([x, y, f(x,y)]);
+            }
+            
+            const endTime = performance.now();
+            return {
+                x, y, 
+                path, 
+                iter, 
+                time: endTime - startTime,
+                converged,
+                finalValue: f(x, y)
+            };
+        }
+
+        function newtonRaphson(x0, y0, maxIter, tolerance) {
+            let x = x0, y = y0;
+            const path = [[x, y, f(x,y)]];
+            let iter = 0;
+            const startTime = performance.now();
+            let converged = false;
+            
+            while (iter < maxIter) {
+                iter++;
+                const [gx, gy] = gradient(x, y);
+                const normGrad = Math.sqrt(gx*gx + gy*gy);
+                
+                // Verificar convergencia
+                if (normGrad < tolerance) {
+                    converged = true;
+                    break;
+                }
+                
+                const H = hessian(x, y);
+                // Inversa de matriz 2x2
+                const det = H[0][0]*H[1][1] - H[0][1]*H[1][0];
+                
+                // Evitar división por cero
+                if (Math.abs(det) < 1e-10) break;
+                
+                const invH = [
+                    [H[1][1]/det, -H[0][1]/det],
+                    [-H[1][0]/det, H[0][0]/det]
+                ];
+                
+                // Dirección: -H⁻¹∇f
+                const dx = -(invH[0][0]*gx + invH[0][1]*gy);
+                const dy = -(invH[1][0]*gx + invH[1][1]*gy);
+                
+                // Búsqueda lineal
+                const step = backtrackingLineSearch(x, y, dx, dy);
+                
+                // Actualizar posición
+                x += step * dx;
+                y += step * dy;
+                path.push([x, y, f(x,y)]);
+            }
+            
+            const endTime = performance.now();
+            return {
+                x, y, 
+                path, 
+                iter, 
+                time: endTime - startTime,
+                converged,
+                finalValue: f(x, y)
+            };
+        }
+
+        function conjugateGradient(x0, y0, maxIter, tolerance) {
+            let x = x0, y = y0;
+            const path = [[x, y, f(x,y)]];
+            let iter = 0;
+            const startTime = performance.now();
+            let converged = false;
+            
+            let [gx, gy] = gradient(x, y);
+            let dx = -gx, dy = -gy;
+            
+            while (iter < maxIter) {
+                iter++;
+                const normGrad = Math.sqrt(gx*gx + gy*gy);
+                
+                // Verificar convergencia
+                if (normGrad < tolerance) {
+                    converged = true;
+                    break;
+                }
+                
+                // Búsqueda lineal en la dirección conjugada
+                const step = backtrackingLineSearch(x, y, dx, dy);
+                
+                // Guardar gradiente anterior
+                const g_prev = [gx, gy];
+                
+                // Actualizar posición
+                x += step * dx;
+                y += step * dy;
+                path.push([x, y, f(x,y)]);
+                
+                // Calcular nuevo gradiente
+                [gx, gy] = gradient(x, y);
+                
+                // Fletcher-Reeves: β = ||g_{k+1}||² / ||g_k||²
+                const beta = (gx*gx + gy*gy) / (g_prev[0]*g_prev[0] + g_prev[1]*g_prev[1]);
+                
+                // Actualizar dirección conjugada
+                dx = -gx + beta * dx;
+                dy = -gy + beta * dy;
+            }
+            
+            const endTime = performance.now();
+            return {
+                x, y, 
+                path, 
+                iter, 
+                time: endTime - startTime,
+                converged,
+                finalValue: f(x, y)
+            };
+        }
+
+        function bfgs(x0, y0, maxIter, tolerance) {
+            let x = x0, y = y0;
+            const path = [[x, y, f(x,y)]];
+            let iter = 0;
+            const startTime = performance.now();
+            let converged = false;
+            
+            // Inicializar B como identidad
+            let B = [[1, 0], [0, 1]];
+            let [gx, gy] = gradient(x, y);
+            
+            while (iter < maxIter) {
+                iter++;
+                const normGrad = Math.sqrt(gx*gx + gy*gy);
+                
+                // Verificar convergencia
+                if (normGrad < tolerance) {
+                    converged = true;
+                    break;
+                }
+                
+                // Dirección: d = -B⁻¹g
+                const det = B[0][0]*B[1][1] - B[0][1]*B[1][0];
+                
+                // Evitar división por cero
+                if (Math.abs(det) < 1e-10) break;
+                
+                const invB = [
+                    [B[1][1]/det, -B[0][1]/det],
+                    [-B[1][0]/det, B[0][0]/det]
+                ];
+                
+                const dx = -(invB[0][0]*gx + invB[0][1]*gy);
+                const dy = -(invB[1][0]*gx + invB[1][1]*gy);
+                
+                // Guardar estado actual
+                const x_prev = x, y_prev = y;
+                const g_prev = [gx, gy];
+                
+                // Búsqueda lineal
+                const step = backtrackingLineSearch(x, y, dx, dy);
+                
+                // Actualizar posición
+                x += step * dx;
+                y += step * dy;
+                path.push([x, y, f(x,y)]);
+                
+                // Actualizar gradiente
+                [gx, gy] = gradient(x, y);
+                
+                // Actualizar B (BFGS)
+                const s = [x - x_prev, y - y_prev];
+                const yk = [gx - g_prev[0], gy - g_prev[1]];
+                const sTyk = s[0]*yk[0] + s[1]*yk[1];
+                
+                // Solo actualizar si sTyk es suficientemente grande
+                if (Math.abs(sTyk) > 1e-10) {
+                    // Término 1: yyᵀ / (yᵀs)
+                    const term1 = [
+                        [yk[0]*yk[0], yk[0]*yk[1]],
+                        [yk[1]*yk[0], yk[1]*yk[1]]
+                    ].map(row => row.map(val => val / sTyk));
+                    
+                    // Término 2: (Bs)(sᵀB) / (sᵀBs)
+                    const Bs = [B[0][0]*s[0] + B[0][1]*s[1], B[1][0]*s[0] + B[1][1]*s[1]];
+                    const sTBs = s[0]*Bs[0] + s[1]*Bs[1];
+                    
+                    const term2 = [
+                        [Bs[0]*Bs[0], Bs[0]*Bs[1]],
+                        [Bs[1]*Bs[0], Bs[1]*Bs[1]]
+                    ].map(row => row.map(val => val / sTBs));
+                    
+                    // Actualizar B: B_{k+1} = B + term1 - term2
+                    B = [
+                        [B[0][0] + term1[0][0] - term2[0][0], B[0][1] + term1[0][1] - term2[0][1]],
+                        [B[1][0] + term1[1][0] - term2[1][0], B[1][1] + term1[1][1] - term2[1][1]]
+                    ];
+                }
+            }
+            
+            const endTime = performance.now();
+            return {
+                x, y, 
+                path, 
+                iter, 
+                time: endTime - startTime,
+                converged,
+                finalValue: f(x, y)
+            };
+        }
+
+        function runOptimization() {
+            const method = document.getElementById('method').value;
+            const x0 = parseFloat(document.getElementById('x0').value);
+            const y0 = parseFloat(document.getElementById('y0').value);
+            const maxIter = parseInt(document.getElementById('max-iter').value);
+            const tolerance = parseFloat(document.getElementById('tolerance').value);
+            
+            let result;
+            switch(method) {
+                case 'gradient': 
+                    result = gradientDescent(x0, y0, maxIter, tolerance);
+                    break;
+                case 'newton': 
+                    result = newtonRaphson(x0, y0, maxIter, tolerance);
+                    break;
+                case 'conjugate': 
+                    result = conjugateGradient(x0, y0, maxIter, tolerance);
+                    break;
+                case 'bfgs': 
+                    result = bfgs(x0, y0, maxIter, tolerance);
+                    break;
+            }
+            
+            // Actualizar tabla de resultados
+            // El mínimo global es aproximadamente en (4, 3) con f ≈ 10
+            const minGlobal = 10;
+            const error = Math.abs(result.finalValue - minGlobal);
+            const convergenceStatus = result.converged ? "Convergido" : "No convergió";
+            
+            document.getElementById('results-body').innerHTML = `
+                <tr>
+                    <td>${method}</td>
+                    <td>${result.iter}</td>
+                    <td>(${result.x.toFixed(4)}, ${result.y.toFixed(4)})</td>
+                    <td>${result.finalValue.toFixed(6)}</td>
+                    <td class="${error < 0.1 ? 'success-cell' : 'error-cell'}">${error.toFixed(6)}</td>
+                    <td>${convergenceStatus}</td>
+                    <td>${result.time.toFixed(2)}</td>
+                </tr>
+            `;
+            
+            // Generar gráficos
+            plotSurface(result.path, x0, y0, result.x, result.y);
+            plotContour(result.path, x0, y0, result.x, result.y);
+        }
+
+        function reset() {
+            document.getElementById('results-body').innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 20px;">
+                        Ejecuta una optimización para ver los resultados
+                    </td>
+                </tr>
+            `;
+            document.getElementById('x0').value = "0.0";
+            document.getElementById('y0').value = "0.0";
+            
+            // Limpiar gráficos
+            Plotly.purge('surface-plot');
+            Plotly.purge('contour-plot');
+        }
+
+        function plotSurface(path, x0, y0, x_opt, y_opt) {
+            // Generar superficie
+            const x = [], y = [], z = [];
+            for (let i = 0; i <= 8; i += 0.25) {
+                for (let j = 0; j <= 6; j += 0.25) {
+                    x.push(i);
+                    y.push(j);
+                    z.push(f(i, j));
+                }
+            }
+            
+            // Datos de la trayectoria
+            const pathX = path.map(p => p[0]);
+            const pathY = path.map(p => p[1]);
+            const pathZ = path.map(p => p[2]);
+            
+            // Trazas
+            const surfaceTrace = {
+                x, y, z,
+                type: 'mesh3d',
+                opacity: 0.7,
+                colorscale: 'Viridis',
+                name: 'Superficie de energía'
+            };
+            
+            const pathTrace = {
+                x: pathX,
+                y: pathY,
+                z: pathZ,
+                type: 'scatter3d',
+                mode: 'lines+markers',
+                marker: { size: 4, color: 'red' },
+                line: { color: 'red', width: 4 },
+                name: 'Trayectoria de optimización'
+            };
+            
+            // Punto inicial
+            const startPoint = {
+                x: [x0],
+                y: [y0],
+                z: [f(x0, y0)],
+                type: 'scatter3d',
+                mode: 'markers+text',
+                marker: { size: 6, color: 'green' },
+                text: ['Punto Inicial'],
+                textposition: "top center",
+                name: 'Punto Inicial'
+            };
+            
+            // Punto final (óptimo)
+            const endPoint = {
+                x: [x_opt],
+                y: [y_opt],
+                z: [f(x_opt, y_opt)],
+                type: 'scatter3d',
+                mode: 'markers+text',
+                marker: { size: 6, color: 'blue' },
+                text: ['Punto Final'],
+                textposition: "top center",
+                name: 'Punto Final'
+            };
+            
+            const layout = {
+                title: 'Superficie de Energía y Trayectoria del Dron',
+                scene: { 
+                    xaxis: { title: 'Coordenada x', range: [0, 8] },
+                    yaxis: { title: 'Coordenada y', range: [0, 6] },
+                    zaxis: { title: 'Consumo Energético (f)' }
+                },
+                margin: { t: 40, b: 20, l: 0, r: 0 },
+                showlegend: true
+            };
+            
+            Plotly.newPlot('surface-plot', [surfaceTrace, pathTrace, startPoint, endPoint], layout);
+        }
+
+        function plotContour(path, x0, y0, x_opt, y_opt) {
+            // Generar contornos
+            const xGrid = [], yGrid = [], zGrid = [];
+            for (let i = 0; i <= 8; i += 0.1) {
+                const row = [];
+                for (let j = 0; j <= 6; j += 0.1) {
+                    row.push(f(i, j));
+                }
+                zGrid.push(row);
+                yGrid.push(i);
+            }
+            for (let j = 0; j <= 6; j += 0.1) {
+                xGrid.push(j);
+            }
+            
+            // Trazas
+            const contourTrace = {
+                x: xGrid,
+                y: yGrid,
+                z: zGrid,
+                type: 'contour',
+                colorscale: 'Hot',
+                name: 'Curvas de nivel',
+                contours: {
+                    start: 10,
+                    end: 150,
+                    size: 10
+                }
+            };
+            
+            const pathTrace = {
+                x: path.map(p => p[0]),
+                y: path.map(p => p[1]),
+                type: 'scatter',
+                mode: 'lines+markers',
+                marker: { color: 'blue', size: 6 },
+                line: { color: 'blue', width: 2 },
+                name: 'Trayectoria'
+            };
+            
+            // Punto inicial
+            const startPoint = {
+                x: [x0],
+                y: [y0],
+                type: 'scatter',
+                mode: 'markers+text',
+                marker: { size: 10, color: 'green' },
+                text: ['Inicio'],
+                textposition: "top center",
+                name: 'Punto Inicial'
+            };
+            
+            // Punto final (óptimo)
+            const endPoint = {
+                x: [x_opt],
+                y: [y_opt],
+                type: 'scatter',
+                mode: 'markers+text',
+                marker: { size: 10, color: 'red' },
+                text: ['Final'],
+                textposition: "bottom center",
+                name: 'Punto Final'
+            };
+            
+            const layout = {
+                title: 'Curvas de Nivel y Progreso de Optimización',
+                xaxis: { title: 'Coordenada x', range: [0, 8] },
+                yaxis: { title: 'Coordenada y', range: [0, 6] },
+                showlegend: true,
+                margin: { t: 40, b: 40, l: 40, r: 20 }
+            };
+            
+            Plotly.newPlot('contour-plot', [contourTrace, pathTrace, startPoint, endPoint], layout);
+        }
+
+        // Actualizar descripción del método al cambiar
+        document.getElementById('method').addEventListener('change', function() {
+            const descriptions = {
+                'gradient': 'El Gradiente Descendente sigue la dirección de máxima pendiente para encontrar mínimos. Es robusto pero puede ser lento en terrenos complejos.',
+                'newton': 'El método de Newton-Raphson utiliza información de segundo orden (Hessiano) para converger rápidamente. Requiere cálculo de derivadas segundas y puede ser inestable.',
+                'conjugate': 'El Gradiente Conjugado es eficiente para problemas a gran escala. Genera direcciones conjugadas para evitar repetir búsquedas en las mismas direcciones.',
+                'bfgs': 'BFGS (Broyden-Fletcher-Goldfarb-Shanno) es un método quasi-Newton que aproxima el Hessiano sin calcularlo directamente. Equilibrio entre velocidad y estabilidad.'
+            };
+            
+            document.getElementById('method-description').textContent = descriptions[this.value];
+        });
+        
+        // Inicializar descripción
+        document.getElementById('method-description').textContent = 
+            'El Gradiente Descendente sigue la dirección de máxima pendiente para encontrar mínimos. Es robusto pero puede ser lento en terrenos complejos.';
+    </script>
+</body>
+</html>
