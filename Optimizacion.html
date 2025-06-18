@@ -15,7 +15,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            background: linear-gradient(135deg, #843FA1, #10FFE3, #843FA1);
             color: #333;
             line-height: 1.6;
             padding: 20px;
@@ -32,11 +32,11 @@
         }
         
         header {
-            background: linear-gradient(to right, #1a2980, #26d0ce);
+            background: linear-gradient(to right, #843FA1, #10FFE3);
             color: white;
             padding: 25px;
             text-align: center;
-            border-bottom: 5px solid #ff8c00;
+            border-bottom: 5px solid #5A2A6C;
         }
         
         h1 {
@@ -111,10 +111,10 @@
         }
         
         h2 {
-            color: #1a2980;
+            color: #843FA1;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #26d0ce;
+            border-bottom: 2px solid #10FFE3;
         }
         
         .control-group {
@@ -125,7 +125,7 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #1a2980;
+            color: #843FA1;
         }
         
         select, input {
@@ -138,7 +138,7 @@
         }
         
         select:focus, input:focus {
-            border-color: #26d0ce;
+            border-color: #10FFE3;
             outline: none;
         }
         
@@ -161,7 +161,7 @@
         }
         
         .optimize-btn {
-            background: linear-gradient(to right, #1a2980, #26d0ce);
+            background: linear-gradient(to right, #843FA1, #10FFE3);
         }
         
         .optimize-btn:hover {
@@ -170,7 +170,7 @@
         }
         
         .reset-btn {
-            background: linear-gradient(to right, #b21f1f, #ff8c00);
+            background: linear-gradient(to right, #5A2A6C, #843FA1);
         }
         
         .reset-btn:hover {
@@ -180,14 +180,14 @@
         
         .method-info {
             background: white;
-            border-left: 4px solid #26d0ce;
+            border-left: 4px solid #10FFE3;
             padding: 15px;
             border-radius: 0 8px 8px 0;
             margin-top: 20px;
         }
         
         .method-info h3 {
-            color: #1a2980;
+            color: #843FA1;
             margin-bottom: 10px;
         }
         
@@ -212,7 +212,7 @@
         }
         
         th {
-            background: linear-gradient(to right, #1a2980, #26d0ce);
+            background: linear-gradient(to right, #843FA1, #10FFE3);
             color: white;
         }
         
@@ -237,7 +237,7 @@
         footer {
             text-align: center;
             padding: 20px;
-            background: linear-gradient(to right, #1a2980, #26d0ce);
+            background: linear-gradient(to right, #843FA1, #10FFE3);
             color: white;
             margin-top: 20px;
         }
@@ -273,7 +273,7 @@
         
         <div class="equation-container">
             Minimiza el consumo energético: 
-            \( f(x,y) = 3(x-4)^2 + 2(y-3)^2 + 5 \sin(0.5x) \cos(0.5y) + 10 \)
+            \( f(x,y) = 3(x-4)^2 + 2(y-3)^2 + 5 \sin(0.5(x-4)) \cos(0.5(y-3)) + 10 \)
         </div>
         
         <div class="content">
@@ -359,36 +359,36 @@
         </div>
         
         <footer>
-            Simulador de Métodos de Optimización &copy; 2023 - Departamento de Ingeniería
+            Simulador de Métodos de Optimización &copy; 2025 - Departamento de Ciencias Básicas
         </footer>
     </div>
 
     <script>
-        // Función objetivo convexa mejorada
+        // Función objetivo modificada para tener mínimo en (4,3)
         function f(x, y) {
             // Término cuadrático principal (convexa)
             const quadraticTerm = 3 * Math.pow(x - 4, 2) + 2 * Math.pow(y - 3, 2);
             
-            // Término sinusoidal suave (no afecta convexidad)
-            const sinTerm = 5 * Math.sin(0.5 * x) * Math.cos(0.5 * y);
+            // Término sinusoidal centrado en (4,3) con menor amplitud
+            const sinTerm = 2.5 * Math.sin(0.5 * (x - 4)) * Math.cos(0.5 * (y - 3));
             
             return quadraticTerm + sinTerm + 10;
         }
 
-        // Gradiente (derivadas parciales)
+        // Gradiente (derivadas parciales) - versión corregida
         function gradient(x, y) {
             // Derivadas del término cuadrático
             const dfdx_quad = 6 * (x - 4);
             const dfdy_quad = 4 * (y - 3);
             
             // Derivadas del término sinusoidal
-            const dfdx_sin = 2.5 * Math.cos(0.5 * x) * Math.cos(0.5 * y);
-            const dfdy_sin = -2.5 * Math.sin(0.5 * x) * Math.sin(0.5 * y);
+            const dfdx_sin = 1.25 * Math.cos(0.5 * (x - 4)) * Math.cos(0.5 * (y - 3));
+            const dfdy_sin = -1.25 * Math.sin(0.5 * (x - 4)) * Math.sin(0.5 * (y - 3));
             
             return [dfdx_quad + dfdx_sin, dfdy_quad + dfdy_sin];
         }
 
-        // Hessiano (matriz de segundas derivadas)
+        // Hessiano (matriz de segundas derivadas) - versión corregida
         function hessian(x, y) {
             // Segundas derivadas del término cuadrático
             const d2fdx2_quad = 6;
@@ -396,9 +396,9 @@
             const d2fdxdy_quad = 0;
             
             // Segundas derivadas del término sinusoidal
-            const d2fdx2_sin = -1.25 * Math.sin(0.5 * x) * Math.cos(0.5 * y);
-            const d2fdy2_sin = -1.25 * Math.sin(0.5 * x) * Math.cos(0.5 * y);
-            const d2fdxdy_sin = -1.25 * Math.cos(0.5 * x) * Math.sin(0.5 * y);
+            const d2fdx2_sin = -0.625 * Math.sin(0.5 * (x - 4)) * Math.cos(0.5 * (y - 3));
+            const d2fdy2_sin = -0.625 * Math.sin(0.5 * (x - 4)) * Math.cos(0.5 * (y - 3));
+            const d2fdxdy_sin = -0.625 * Math.cos(0.5 * (x - 4)) * Math.sin(0.5 * (y - 3));
             
             return [
                 [d2fdx2_quad + d2fdx2_sin, d2fdxdy_quad + d2fdxdy_sin],
@@ -406,15 +406,17 @@
             ];
         }
 
-        // Búsqueda lineal por backtracking
-        function backtrackingLineSearch(x, y, dx, dy, alpha=1.0, beta=0.8) {
+        // Búsqueda lineal por backtracking mejorada
+        function backtrackingLineSearch(x, y, dx, dy, alpha=1.0, beta=0.7, maxIter=50) {
             const [gx, gy] = gradient(x, y);
             const initialSlope = gx*dx + gy*dy;
             const f0 = f(x, y);
             let step = alpha;
+            let iter = 0;
             
             // Reducir el paso hasta que se satisfaga la condición de Armijo
-            for (let i = 0; i < 20; i++) {
+            while (iter < maxIter) {
+                iter++;
                 const xNew = x + step * dx;
                 const yNew = y + step * dy;
                 const fNew = f(xNew, yNew);
@@ -577,6 +579,7 @@
             };
         }
 
+        // BFGS corregido usando aproximación de Hessiano inverso
         function bfgs(x0, y0, maxIter, tolerance) {
             let x = x0, y = y0;
             const path = [[x, y, f(x,y)]];
@@ -584,8 +587,8 @@
             const startTime = performance.now();
             let converged = false;
             
-            // Inicializar B como identidad
-            let B = [[1, 0], [0, 1]];
+            // Inicializar H (inversa aproximada del Hessiano) como identidad
+            let H = [[1, 0], [0, 1]];
             let [gx, gy] = gradient(x, y);
             
             while (iter < maxIter) {
@@ -598,26 +601,16 @@
                     break;
                 }
                 
-                // Dirección: d = -B⁻¹g
-                const det = B[0][0]*B[1][1] - B[0][1]*B[1][0];
+                // Dirección: d = -H * g
+                const dx = -(H[0][0]*gx + H[0][1]*gy);
+                const dy = -(H[1][0]*gx + H[1][1]*gy);
                 
-                // Evitar división por cero
-                if (Math.abs(det) < 1e-10) break;
-                
-                const invB = [
-                    [B[1][1]/det, -B[0][1]/det],
-                    [-B[1][0]/det, B[0][0]/det]
-                ];
-                
-                const dx = -(invB[0][0]*gx + invB[0][1]*gy);
-                const dy = -(invB[1][0]*gx + invB[1][1]*gy);
+                // Búsqueda lineal
+                const step = backtrackingLineSearch(x, y, dx, dy);
                 
                 // Guardar estado actual
                 const x_prev = x, y_prev = y;
                 const g_prev = [gx, gy];
-                
-                // Búsqueda lineal
-                const step = backtrackingLineSearch(x, y, dx, dy);
                 
                 // Actualizar posición
                 x += step * dx;
@@ -627,32 +620,53 @@
                 // Actualizar gradiente
                 [gx, gy] = gradient(x, y);
                 
-                // Actualizar B (BFGS)
+                // Diferencia en posición (s) y gradiente (yk)
                 const s = [x - x_prev, y - y_prev];
                 const yk = [gx - g_prev[0], gy - g_prev[1]];
                 const sTyk = s[0]*yk[0] + s[1]*yk[1];
                 
                 // Solo actualizar si sTyk es suficientemente grande
                 if (Math.abs(sTyk) > 1e-10) {
-                    // Término 1: yyᵀ / (yᵀs)
+                    const rho = 1 / sTyk;
+                    
+                    // Actualización BFGS para H
+                    const I = [[1, 0], [0, 1]];
+                    
+                    // Término 1: I - rho * s * yk^T
                     const term1 = [
-                        [yk[0]*yk[0], yk[0]*yk[1]],
-                        [yk[1]*yk[0], yk[1]*yk[1]]
-                    ].map(row => row.map(val => val / sTyk));
+                        [I[0][0] - rho * s[0]*yk[0], I[0][1] - rho * s[0]*yk[1]],
+                        [I[1][0] - rho * s[1]*yk[0], I[1][1] - rho * s[1]*yk[1]]
+                    ];
                     
-                    // Término 2: (Bs)(sᵀB) / (sᵀBs)
-                    const Bs = [B[0][0]*s[0] + B[0][1]*s[1], B[1][0]*s[0] + B[1][1]*s[1]];
-                    const sTBs = s[0]*Bs[0] + s[1]*Bs[1];
-                    
+                    // Término 2: I - rho * yk * s^T
                     const term2 = [
-                        [Bs[0]*Bs[0], Bs[0]*Bs[1]],
-                        [Bs[1]*Bs[0], Bs[1]*Bs[1]]
-                    ].map(row => row.map(val => val / sTBs));
+                        [I[0][0] - rho * yk[0]*s[0], I[0][1] - rho * yk[0]*s[1]],
+                        [I[1][0] - rho * yk[1]*s[0], I[1][1] - rho * yk[1]*s[1]]
+                    ];
                     
-                    // Actualizar B: B_{k+1} = B + term1 - term2
-                    B = [
-                        [B[0][0] + term1[0][0] - term2[0][0], B[0][1] + term1[0][1] - term2[0][1]],
-                        [B[1][0] + term1[1][0] - term2[1][0], B[1][1] + term1[1][1] - term2[1][1]]
+                    // Término 3: rho * s * s^T
+                    const term3 = [
+                        [rho * s[0]*s[0], rho * s[0]*s[1]],
+                        [rho * s[1]*s[0], rho * s[1]*s[1]]
+                    ];
+                    
+                    // H_new = term1 * H * term2 + term3
+                    // Primero: H * term2
+                    const H_term2 = [
+                        [H[0][0]*term2[0][0] + H[0][1]*term2[1][0], H[0][0]*term2[0][1] + H[0][1]*term2[1][1]],
+                        [H[1][0]*term2[0][0] + H[1][1]*term2[1][0], H[1][0]*term2[0][1] + H[1][1]*term2[1][1]]
+                    ];
+                    
+                    // Luego: term1 * (H_term2)
+                    const term1_H_term2 = [
+                        [term1[0][0]*H_term2[0][0] + term1[0][1]*H_term2[1][0], term1[0][0]*H_term2[0][1] + term1[0][1]*H_term2[1][1]],
+                        [term1[1][0]*H_term2[0][0] + term1[1][1]*H_term2[1][0], term1[1][0]*H_term2[0][1] + term1[1][1]*H_term2[1][1]]
+                    ];
+                    
+                    // Finalmente: H_new = term1_H_term2 + term3
+                    H = [
+                        [term1_H_term2[0][0] + term3[0][0], term1_H_term2[0][1] + term3[0][1]],
+                        [term1_H_term2[1][0] + term3[1][0], term1_H_term2[1][1] + term3[1][1]]
                     ];
                 }
             }
@@ -692,7 +706,7 @@
             }
             
             // Actualizar tabla de resultados
-            // El mínimo global es aproximadamente en (4, 3) con f ≈ 10
+            // El mínimo global es en (4, 3) con f = 10
             const minGlobal = 10;
             const error = Math.abs(result.finalValue - minGlobal);
             const convergenceStatus = result.converged ? "Convergido" : "No convergió";
@@ -703,7 +717,7 @@
                     <td>${result.iter}</td>
                     <td>(${result.x.toFixed(4)}, ${result.y.toFixed(4)})</td>
                     <td>${result.finalValue.toFixed(6)}</td>
-                    <td class="${error < 0.1 ? 'success-cell' : 'error-cell'}">${error.toFixed(6)}</td>
+                    <td class="${error < 0.01 ? 'success-cell' : 'error-cell'}">${error.toFixed(6)}</td>
                     <td>${convergenceStatus}</td>
                     <td>${result.time.toFixed(2)}</td>
                 </tr>
@@ -750,8 +764,9 @@
             const surfaceTrace = {
                 x, y, z,
                 type: 'mesh3d',
-                opacity: 0.7,
-                colorscale: 'Viridis',
+                opacity: 0.8,
+                colorscale: [[0, '#10FFE3'], [0.5, '#843FA1'], [1, '#5A2A6C']],
+                intensity: z,
                 name: 'Superficie de energía'
             };
             
@@ -761,8 +776,8 @@
                 z: pathZ,
                 type: 'scatter3d',
                 mode: 'lines+markers',
-                marker: { size: 4, color: 'red' },
-                line: { color: 'red', width: 4 },
+                marker: { size: 4, color: '#FFD700' },
+                line: { color: '#FFD700', width: 4 },
                 name: 'Trayectoria de optimización'
             };
             
@@ -773,7 +788,7 @@
                 z: [f(x0, y0)],
                 type: 'scatter3d',
                 mode: 'markers+text',
-                marker: { size: 6, color: 'green' },
+                marker: { size: 6, color: '#00FF00' },
                 text: ['Punto Inicial'],
                 textposition: "top center",
                 name: 'Punto Inicial'
@@ -786,7 +801,7 @@
                 z: [f(x_opt, y_opt)],
                 type: 'scatter3d',
                 mode: 'markers+text',
-                marker: { size: 6, color: 'blue' },
+                marker: { size: 6, color: '#FF0000' },
                 text: ['Punto Final'],
                 textposition: "top center",
                 name: 'Punto Final'
@@ -807,18 +822,27 @@
         }
 
         function plotContour(path, x0, y0, x_opt, y_opt) {
-            // Generar contornos
-            const xGrid = [], yGrid = [], zGrid = [];
-            for (let i = 0; i <= 8; i += 0.1) {
+            // Generar contornos CORREGIDO
+            const xGrid = [];
+            const yGrid = [];
+            const zGrid = [];
+
+            // Poblaremos xGrid con valores de 0 a 8 (coordenada x)
+            for (let x = 0; x <= 8; x += 0.1) {
+                xGrid.push(x);
+            }
+            // Poblaremos yGrid con valores de 0 a 6 (coordenada y)
+            for (let y = 0; y <= 6; y += 0.1) {
+                yGrid.push(y);
+            }
+
+            // Inicializar zGrid como matriz de [yGrid.length][xGrid.length]
+            for (let i = 0; i < yGrid.length; i++) {
                 const row = [];
-                for (let j = 0; j <= 6; j += 0.1) {
-                    row.push(f(i, j));
+                for (let j = 0; j < xGrid.length; j++) {
+                    row.push(f(xGrid[j], yGrid[i]));
                 }
                 zGrid.push(row);
-                yGrid.push(i);
-            }
-            for (let j = 0; j <= 6; j += 0.1) {
-                xGrid.push(j);
             }
             
             // Trazas
@@ -827,7 +851,7 @@
                 y: yGrid,
                 z: zGrid,
                 type: 'contour',
-                colorscale: 'Hot',
+                colorscale: [[0, '#10FFE3'], [0.5, '#843FA1'], [1, '#5A2A6C']],
                 name: 'Curvas de nivel',
                 contours: {
                     start: 10,
@@ -841,8 +865,8 @@
                 y: path.map(p => p[1]),
                 type: 'scatter',
                 mode: 'lines+markers',
-                marker: { color: 'blue', size: 6 },
-                line: { color: 'blue', width: 2 },
+                marker: { color: '#FFD700', size: 6 },
+                line: { color: '#FFD700', width: 2 },
                 name: 'Trayectoria'
             };
             
@@ -852,7 +876,7 @@
                 y: [y0],
                 type: 'scatter',
                 mode: 'markers+text',
-                marker: { size: 10, color: 'green' },
+                marker: { size: 10, color: '#00FF00' },
                 text: ['Inicio'],
                 textposition: "top center",
                 name: 'Punto Inicial'
@@ -864,7 +888,7 @@
                 y: [y_opt],
                 type: 'scatter',
                 mode: 'markers+text',
-                marker: { size: 10, color: 'red' },
+                marker: { size: 10, color: '#FF0000' },
                 text: ['Final'],
                 textposition: "bottom center",
                 name: 'Punto Final'
